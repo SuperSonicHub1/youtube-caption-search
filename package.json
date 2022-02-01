@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "better-sqlite3": "^7.5.0",
+    "cheerio": "^1.0.0-rc.10",
+    "express": "^4.17.2",
+    "html-entities": "^2.3.2",
+    "ytcog": "^2.3.0"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}
