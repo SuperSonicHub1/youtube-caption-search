@@ -8,10 +8,12 @@ db.exec(`CREATE TABLE IF NOT EXISTS videos (
 	title TEXT
 );`);
 
-for (const video of videos) {
-	const id = video._id,
-		title = video.snippet.title
-	db
-		.prepare('INSERT INTO videos VALUES (?, ?);')
-		.run(id, title)
-}
+const insert = db.prepare('INSERT INTO videos VALUES (?, ?);')
+
+db.transaction(() => {
+	for (const video of videos) {
+		const id = video._id,
+			title = video.snippet.title
+		insert.run(id, title)
+	}
+})()

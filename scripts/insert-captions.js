@@ -8,6 +8,12 @@ const Database = require('better-sqlite3')
 const db = new Database('captions.db')
 const session = new Session()
 
+function sleep(ms) {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
+}
+
 db.exec(`
 -- Create captions table
 CREATE TABLE IF NOT EXISTS captions (
@@ -45,6 +51,8 @@ CREATE TRIGGER after_captions_delete AFTER DELETE ON captions BEGIN
 END;
 `)
 
+const insert = db.prepare("INSERT INTO captions VALUES (?, ?, ?, ?);")
+
 session.fetch().then(async () => {
 	for (const {id} of db.prepare('SELECT id FROM videos;').all()) {
 		const video = new Video(session, {id})
@@ -62,11 +70,12 @@ session.fetch().then(async () => {
 						return {start, end, text: decode($text.text())}
 					})
 					.toArray()
-				for (const {start, end, text} of cues) {
-					db
-						.prepare("INSERT INTO captions VALUES (?, ?, ?, ?);")
-						.run(id, text, start, end,)
-				}
+				db.transaction(() => {
+					for (const {start, end, text} of cues) {
+							insert.run(id, text, start, end,)
+					}
+				})()
+				sleep(400)
 			}
 		}
 	}
